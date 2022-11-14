@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { auth, database } from 'firebase/firebase';
 import { PARTICIPANTS, PASSWORD, PROJECTS } from 'src/util/constants';
 import { createParticipant, joinProject, updateParticipant } from './types'
@@ -32,6 +32,31 @@ export class ParticipantService {
         })
 
         return allParticipants
+    }
+
+    async fetchAllParticipantsFromProject(projectId: string) {
+        const participants = await database.collection(PROJECTS)
+            .doc(projectId)
+            .collection(PARTICIPANTS)
+            .get()
+
+        const allParticipantsIds = []
+
+        participants.forEach((snapshot) => {
+            const participantId = snapshot.data().participantId as unknown as string
+            allParticipantsIds.push(participantId)
+        })
+
+        if (allParticipantsIds.length === 0) return []
+
+        const allFetchedParticipants = []
+
+        for (const participantId of allParticipantsIds) {
+            const fetchedParticipant = await this.fetchOneParticipant(participantId)
+            allFetchedParticipants.push(fetchedParticipant)
+        }
+
+        return allFetchedParticipants
     }
 
     async fetchOneParticipant(participantId: string) {

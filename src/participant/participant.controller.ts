@@ -148,6 +148,31 @@ export class ParticipantController {
         return participant
     }
 
+    @Get('fetchAll/:projectId')
+    @ApiSecurity('X-API-KEY')
+    @UseGuards(AuthGuard('api-key'))
+    @ApiOperation({
+        summary: 'Fetch all participants from a project'
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Participant(s) fetched successfully'
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'Unauthorized. Enter API key correctly.'
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'Internal server error'
+    })
+    async fetchAllParticipantsFromProject(
+        @Param('projectId') projectId: string
+    ) {
+        const participants = await this.participantService.fetchAllParticipantsFromProject(projectId)
+        return participants
+    }
+
     @Get('fetchOne/:participantId')
     @ApiSecurity('X-API-KEY')
     @UseGuards(AuthGuard('api-key'))
